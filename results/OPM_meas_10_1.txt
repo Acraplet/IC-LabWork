@@ -1,0 +1,23 @@
+File: data_powermeter_10_1.csv
+Measurement number (XX): 10
+Run number (Y): 1
+Start of measurement: 2025-11-27 17:44:11
+Sample interval [s]: 0.1
+Number of samples: 244
+Total duration [s]: 24.300000
+Wavelength [nm]: 401.0
+Pulse width [ps]: 850
+
+PD current [pA]: 8.63
+
+Power statistics (nW):
+  Mean: 7.881553e+02
+  Std:  1.058115e+00
+  Min:  7.851700e+02
+  Max:  7.909800e+02
+
+Gaussian fit to histogram of power (nW):
+  Model: A * exp(-0.5 * ((x - mu)/sigma)^2)
+  A:     2.646987e+01
+  mu:    7.880856e+02  [nW]
+  sigma: 1.065547e+00  [nW]
