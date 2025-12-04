@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 # ---------------------------------------------------------------------
 # Configuration: which measurement numbers to use
 # ---------------------------------------------------------------------
-ALLOWED_MEAS_NUMBERS = set(range(6, 20)) | {21}
+ALLOWED_MEAS_NUMBERS = range(760, 910, 10) #set(range(6, 20)) | {21}
 
 
 def parse_result_file(path: Path):
@@ -139,13 +139,13 @@ def parse_result_file(path: Path):
 
 
 def main():
-    results_dir = Path("../results")
+    results_dir = Path("../results/OPM_per_run")
     if not results_dir.is_dir():
         raise SystemExit(f"Directory not found: {results_dir}")
 
     # Collect data from all OPM_meas_*.txt files
     records = []
-    for path in sorted(results_dir.glob("OPM_meas_*.txt")):
+    for path in sorted(results_dir.glob("New_OPM_meas_*.txt")):
         r = parse_result_file(path)
         if r is None:
             continue
@@ -177,6 +177,14 @@ def main():
     pd_current_sorted = pd_current[order_pd]
     mean_power_pd = mean_power[order_pd]
     sigma_power_pd = sigma_power[order_pd]
+
+    # ---------- NEW: write sorted by pulse width ----------
+    out_path = Path("../results/new_pulse_power_pd_summary.txt")
+    with out_path.open("w", encoding="utf-8") as f:
+        f.write("pulse_width_ps mean_power_nW pd_current_pA\n")
+        for pw, mp, pd in zip(pulse_width_sorted, mean_power_pw, pd_current):
+            f.write(f"{pw:.0f} {mp:.6e} {pd:.6e}\n")
+    # ------------------------------------------------------
 
     # ------------- Plot 1: mean power vs pulse width -----------------
     plt.figure(figsize=(7, 4))
@@ -214,7 +222,9 @@ def main():
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
+    plt.yscale("log")
     plt.savefig("../plots/summary/mean_power_vs_PDcurrent.pdf")
+    plt.savefig("../plots/summary/mean_power_vs_PDcurrent.png")
     plt.close()
 
     print("Created:")

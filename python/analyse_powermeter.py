@@ -42,6 +42,7 @@ pulse_width_dict = {
     20: 900,
     21: 900,
 
+
     }
 
 pd_current_dict = {
@@ -75,7 +76,7 @@ def gaussian(x, A, mu, sigma):
 
 def parse_filename_info(csv_path: Path):
     """Extract measurement number XX and run number Y from data_powermeter_XX_Y.csv"""
-    m = re.search(r"data_powermeter_(\d+)_([0-9A-Za-z]+)", csv_path.stem)
+    m = re.search(r"data_powermeter_and_monitor_(\d+)_([0-9A-Za-z]+)", csv_path.stem)
     if not m:
         raise ValueError(f"Cannot parse measurement/run numbers from file name: {csv_path.name}")
     meas_no = int(m.group(1))
@@ -229,8 +230,12 @@ def analyse_file(csv_path: Path, pulse_width_ps: float = 900.0):
     try:
         pulse_width_ps = pulse_width_dict[meas_no]
     except:
-        print("There was no pre-written pulse width value, we assume 900ps")
-        pulse_width = 900
+        if (meas_no > 600):
+            pulse_width_ps = meas_no
+        else:
+            print("There was no pre-written pulse width value, we assume 900ps")
+            pulse_width_ps = 900
+
     pd_current_pA = pd_current_dict[pulse_width_ps]
 
     # attenuation = 0.0 if (meas_no < 35 or meas_no > XX)  else attenuation_dict[meas_no]
@@ -264,7 +269,7 @@ def analyse_file(csv_path: Path, pulse_width_ps: float = 900.0):
     )
 
     # ---- text output ----
-    txt_path = f"../results/OPM_meas_{meas_no}_{run_no}.txt"
+    txt_path = f"../results/New_OPM_meas_{meas_no}_{run_no}.txt"
     with open(txt_path, "w") as f:
         f.write(f"File: {csv_path.name}\n")
         f.write(f"Measurement number (XX): {meas_no}\n")
@@ -290,7 +295,7 @@ def analyse_file(csv_path: Path, pulse_width_ps: float = 900.0):
         f.write(f"  sigma: {sigma_fit:.6e}  [nW]\n")
 
     # ---- plots & PDF ----
-    pdf_path = f"../plots/per_run/OPM_meas_{meas_no}_{run_no}.pdf"
+    pdf_path = f"../plots/per_run/New_OPM_meas_{meas_no}_{run_no}.pdf"
     with PdfPages(pdf_path) as pdf:
         # Power vs time
         fig1, ax1 = plt.subplots(figsize=(9, 6))
