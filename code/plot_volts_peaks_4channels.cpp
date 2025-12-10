@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
             std::string PMT4_name = PMT4_list[iPMT];
 
 
-            std::string fileName = "../../data/LaserBall/hadded_PMT3_"+PMT3_name+"_and_PMT4_"+PMT4_name+"_results_"+ std::to_string(pw)+"ps_"+std::to_string(ang)+"deg.root";
+            std::string fileName = "../../data/LaserBall/hadded_PMT1_Mon_PMT2_Trig_PMT3_"+PMT3_name+"_and_PMT4_"+PMT4_name+"_results_"+ std::to_string(pw)+"ps_"+std::to_string(ang)+"deg.root";
 
             std::cout << "Looking at file: " << fileName << std::endl;
 
