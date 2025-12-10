@@ -394,8 +394,8 @@ int main(int argc, char** argv) {
                 c1->cd();
                 hSum3->SetTitle("4-sample sums (PMT1/PMT3/PMT4);volts[V];entries");
                 // hSum->Draw("HIST");
-                if (hasPMT3) { hSum3->Draw("HIST SAME"); }
-                if (hasPMT4) { hSum4->Draw("HIST SAME"); }
+                if (hasPMT3) { hSum3->Draw("HIST SAME"); gaus3->Draw("SAME");}
+                if (hasPMT4) { hSum4->Draw("HIST SAME"); gaus4->Draw("SAME");}
 
                 c2->cd();
                 hPeak->SetTitle("Peak voltages;peak volts[V];entries");
@@ -404,7 +404,7 @@ int main(int argc, char** argv) {
                 if (hasPMT4) hPeak4->Draw("HIST SAME");
             } else {
                 c->cd(); h->Draw("HIST SAME");
-                c1->cd(); if (hasPMT3) hSum3->Draw("HIST SAME"); if (hasPMT4) hSum4->Draw("HIST SAME");
+                c1->cd(); if (hasPMT3) {hSum3->Draw("HIST SAME"); gaus3->Draw("SAME");} if (hasPMT4) {hSum4->Draw("HIST SAME"); gaus3->Draw("SAME");}
                 c2->cd(); hPeak->Draw("HIST SAME"); if (hasPMT3) hPeak3->Draw("HIST SAME"); if (hasPMT4) hPeak4->Draw("HIST SAME");
             }
 
