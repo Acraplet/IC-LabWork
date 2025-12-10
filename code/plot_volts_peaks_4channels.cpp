@@ -200,9 +200,13 @@ int main(int argc, char** argv) {
                 h_peak1->SetLineColor(colPMT1+iPMT+iAngle);
                 h_peak1->SetLineWidth(2);
 
+                if (drawn0_spec) {
+                    sumMax = 0.5;
+                }
                 TH1D* h_sum1 = new TH1D(("h_sum4_PMT1" + tag).c_str(),
                                         ("PMT1 sum4 " + tag).c_str(),
                                         nBinsSum, sumMin, sumMax);
+
                 h_sum1->SetDirectory(nullptr);
                 h_sum1->SetLineColor(colPMT1+iPMT+iAngle);
                 h_sum1->SetLineWidth(2);
@@ -310,6 +314,8 @@ int main(int argc, char** argv) {
 
                 // Fit PMT1 sum
                 TF1* gaus1 = new TF1(("gaus1" + tag).c_str(), "gaus", sumMin, sumMax);
+                TF1* gaus3 = new TF1(("gaus3" + tag).c_str(), "gaus", sumMin, sumMax);
+                TF1* gaus4 = new TF1(("gaus4" + tag).c_str(), "gaus", sumMin, sumMax);
                 gaus1->SetParameters(h_sum1->GetMaximum(), h_sum1->GetMean(), h_sum1->GetRMS());
                 gaus1->SetLineColor(kBlack);
                 gaus1->SetLineStyle(2);
@@ -323,12 +329,12 @@ int main(int argc, char** argv) {
 
                 if (hasPMT3 && h_sum3->GetEntries() > 0) {
                     if (h_sum3->GetEntries() > 10) {
-                        TF1* gaus3 = new TF1(("gaus3" + tag).c_str(), "gaus", sumMin, sumMax);
+
                         gaus3->SetParameters(h_sum3->GetMaximum(), h_sum3->GetMean(), h_sum3->GetRMS());
                         h_sum3->Fit(gaus3, "Q0");
                         meanSum3  = gaus3->GetParameter(1);
                         sigmaSum3 = gaus3->GetParameter(2);
-                        delete gaus3;
+                        // delete gaus3;
                     } else {
                         meanSum3  = h_sum3->GetMean();
                         sigmaSum3 = h_sum3->GetRMS();
@@ -337,12 +343,12 @@ int main(int argc, char** argv) {
 
                 if (hasPMT4 && h_sum4->GetEntries() > 0) {
                     if (h_sum4->GetEntries() > 10) {
-                        TF1* gaus4 = new TF1(("gaus4" + tag).c_str(), "gaus", sumMin, sumMax);
+
                         gaus4->SetParameters(h_sum4->GetMaximum(), h_sum4->GetMean(), h_sum4->GetRMS());
                         h_sum4->Fit(gaus4, "Q0");
                         meanSum4  = gaus4->GetParameter(1);
                         sigmaSum4 = gaus4->GetParameter(2);
-                        delete gaus4;
+                        // delete gaus4;
                     } else {
                         meanSum4  = h_sum4->GetMean();
                         sigmaSum4 = h_sum4->GetRMS();
@@ -395,28 +401,25 @@ int main(int argc, char** argv) {
                     // Sums
                     c0_sum->cd();
                     if (!drawn0_sum) {
-                        h_sum1->SetTitle("Sum4 at 0 ps;sum4 [V];entries");
-                        h_sum1->Draw("HIST");
-                        gaus1->Draw("SAME");
+                        h_sum3->SetTitle("Sum4 at 0 ps;sum4 [V];entries");
+                        h_sum3->Draw("HIST");
+                        gaus3->Draw("SAME");
                         drawn0_sum = true;
                     } else {
-                        h_sum1->Draw("HIST SAME");
-                        gaus1->Draw("SAME");
-                    }
-                    l0_sum->AddEntry(h_sum1,
-                                     Form("%s (mean=%.3f, #sigma=%.3f)", labPMT1.c_str(), mean1, sigma1),
-                                     "l");
-                    if (hasPMT3) {
                         h_sum3->Draw("HIST SAME");
-                        l0_sum->AddEntry(h_sum3,
-                                         Form("%s (mean=%.3f, #sigma=%.3f)", labPMT3.c_str(), meanSum3, sigmaSum3),
-                                         "l");
+                        gaus3->Draw("SAME");
                     }
+                    l0_sum->AddEntry(h_sum3,
+                                     Form("%s (mean=%.3f, #sigma=%.3f)", labPMT3.c_str(), meanSum3, sigmaSum3),
+                                     "l");
+
                     if (hasPMT4) {
                         h_sum4->Draw("HIST SAME");
                         l0_sum->AddEntry(h_sum4,
                                          Form("%s (mean=%.3f, #sigma=%.3f)", labPMT4.c_str(), meanSum4, sigmaSum4),
                                          "l");
+                        gaus4->Draw("SAME");
+
                     }
                 }
 
@@ -449,23 +452,18 @@ int main(int argc, char** argv) {
                     // Sums
                     c900_sum->cd();
                     if (!drawn900_sum) {
-                        h_sum1->SetTitle("Sum4 at 900 ps;sum4 [V];entries");
-                        h_sum1->Draw("HIST");
-                        gaus1->Draw("SAME");
+                        h_sum3->SetTitle("Sum4 at 900 ps;sum4 [V];entries");
+                        h_sum3->Draw("HIST");
+                        gaus3->Draw("SAME");
                         drawn900_sum = true;
                     } else {
-                        h_sum1->Draw("HIST SAME");
-                        gaus1->Draw("SAME");
-                    }
-                    l900_sum->AddEntry(h_sum1,
-                                       Form("%s (mean=%.3f, #sigma=%.3f)", labPMT1.c_str(), mean1, sigma1),
-                                       "l");
-                    if (hasPMT3) {
                         h_sum3->Draw("HIST SAME");
-                        l900_sum->AddEntry(h_sum3,
-                                           Form("%s (mean=%.3f, #sigma=%.3f)", labPMT3.c_str(), meanSum3, sigmaSum3),
-                                           "l");
+                        gaus3->Draw("SAME");
                     }
+                    l900_sum->AddEntry(h_sum3,
+                                       Form("%s (mean=%.3f, #sigma=%.3f)", labPMT3.c_str(), meanSum3, sigmaSum3),
+                                       "l");
+
                     if (hasPMT4) {
                         h_sum4->Draw("HIST SAME");
                         l900_sum->AddEntry(h_sum4,
@@ -490,6 +488,8 @@ int main(int argc, char** argv) {
 
                 f->Close();
                 delete gaus1;
+                delete gaus3;
+                delete gaus4;
 
                 std::cout << "Finished analysis for " << pw << " ps, " << ang
                 << " deg, PMT3=" << PMT3_name
