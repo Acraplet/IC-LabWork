@@ -39,9 +39,9 @@ int main(int argc, char** argv) {
     double peakMin     = -0.05;
     double peakMax     =  0.8;
 
-    int    nBinsSum    = 400;
+    int    nBinsSum    = 200;
     double sumMin      = -0.05;
-    double sumMax      =  2.5;
+    double sumMax      =  1;
 
     double vmin = std::numeric_limits<double>::infinity();
     double vmax = -std::numeric_limits<double>::infinity();
@@ -370,8 +370,8 @@ int main(int argc, char** argv) {
             firstHist = false;
 
             c1->cd();
-            hSum->SetTitle("4-sample sums (PMT1/PMT3/PMT4);volts[V];entries");
-            hSum->Draw("HIST");
+            hSum3->SetTitle("4-sample sums (PMT1/PMT3/PMT4);volts[V];entries");
+            // hSum->Draw("HIST");
             if (hasPMT3) { hSum3->Draw("HIST SAME"); }
             if (hasPMT4) { hSum4->Draw("HIST SAME"); }
 
@@ -382,7 +382,7 @@ int main(int argc, char** argv) {
             if (hasPMT4) hPeak4->Draw("HIST SAME");
         } else {
             c->cd(); h->Draw("HIST SAME");
-            c1->cd(); hSum->Draw("HIST SAME"); if (hasPMT3) hSum3->Draw("HIST SAME"); if (hasPMT4) hSum4->Draw("HIST SAME");
+            c1->cd(); if (hasPMT3) hSum3->Draw("HIST SAME"); if (hasPMT4) hSum4->Draw("HIST SAME");
             c2->cd(); hPeak->Draw("HIST SAME"); if (hasPMT3) hPeak3->Draw("HIST SAME"); if (hasPMT4) hPeak4->Draw("HIST SAME");
         }
 
