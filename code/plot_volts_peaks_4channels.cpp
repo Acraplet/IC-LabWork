@@ -31,16 +31,16 @@ int main(int argc, char** argv) {
     std::string branchName    = "volts";
 
     // Histogram settings
-    int    nBins   = 200;
-    double xMin    = -0.2;
+    int    nBins   = 400;
+    double xMin    = -0.05;
     double xMax    =  0.8;
 
-    int    nBinsPeak   = 200;
-    double peakMin     = -0.2;
+    int    nBinsPeak   = 400;
+    double peakMin     = -0.05;
     double peakMax     =  0.8;
 
-    int    nBinsSum    = 200;
-    double sumMin      = -0.2;
+    int    nBinsSum    = 400;
+    double sumMin      = -0.05;
     double sumMax      =  2.5;
 
     double vmin = std::numeric_limits<double>::infinity();
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     TCanvas* c = new TCanvas("c", "Volts overlay", 1200, 1200);
     c->SetGrid();
     c->SetLogy();
-    TLegend* leg = new TLegend(0.55, 0.60, 0.98, 0.98);
+    TLegend* leg = new TLegend(0.45, 0.50, 0.98, 0.98);
     leg->SetBorderSize(0);
     leg->SetFillStyle(0);
     leg->SetTextSize(0.025);
