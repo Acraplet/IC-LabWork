@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
     for (size_t iPW = 0; iPW < pulseWidths.size(); ++iPW) {
         int pw = pulseWidths[iPW];
 
-        std::string fileName = "../../data/LaserBall/hadded_Monitor_PMT_and_OPM_results_"+ std::to_string(pw)+"ps_0deg.root "
+        std::string fileName = "../../data/LaserBall/hadded_Monitor_PMT_and_OPM_results_"+ std::to_string(pw)+"ps_0deg.root";
 
         //"../data/MonitorPMT/hadded_Monitor_PMT_and_OPM_results_" + std::to_string(pw) + "ps.root";
 
