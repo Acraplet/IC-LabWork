@@ -27,13 +27,13 @@ int main(int argc, char** argv) {
     angleLaserBall.push_back(0);
     angleLaserBall.push_back(90);
 
-    std::vector<std::str> PMT3_list;
-    PMT3_list.push_back("-30")
-    PMT3_list.push_back("H")
+    std::vector<std::string> PMT3_list;
+    PMT3_list.push_back("-30");
+    PMT3_list.push_back("H");
 
-    std::vector<std::str> PMT4_list;
-    PMT4_list.push_back("V")
-    PMT4_list.push_back("+30")
+    std::vector<std::string> PMT4_list;
+    PMT4_list.push_back("V");
+    PMT4_list.push_back("+30");
 
 
 
@@ -113,13 +113,13 @@ int main(int argc, char** argv) {
             for (size_t iPMT = 0; iPMT < PMT3_list.size(); ++iPMT){
             int pw = pulseWidths[iPW];
             int ang = angleLaserBall[iAngle];
-            std::str PMT3_name = PMT3_list[iPMT];
-            std::str PMT4_name = PMT4_list[iPMT];
+            std::string PMT3_name = PMT3_list[iPMT];
+            std::string PMT4_name = PMT4_list[iPMT];
 
 
             std::string fileName = "../../data/LaserBall/hadded_PMT3_"+PMT3_name+"_and_PMT4_"+PMT4_name+"_results_"+ std::to_string(pw)+"ps_"+std::to_string(ang)+"deg.root";
 
-            std::cout << "Looking at file: " << fileName << std::cout;
+            std::cout << "Looking at file: " << fileName << std::endl;
 
             //"../data/MonitorPMT/hadded_Monitor_PMT_and_OPM_results_" + std::to_string(pw) + "ps.root";
 
