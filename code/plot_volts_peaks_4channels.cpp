@@ -41,6 +41,10 @@ int main(int argc, char** argv) {
     double sumMin      = -0.2;
     double sumMax      =  2.5;
 
+    double vmin = std::numeric_limits<double>::infinity();
+    double vmax = -std::numeric_limits<double>::infinity();
+    double sum  = 0.0;
+
     std::string outputCanvasName = "volts_overlay";
     std::string outputPdfName    = "../plots/summary/LaserBall_PMT1_Mon_PMT3_-30_PMT4_V_spectrum.pdf";
     std::string outputPdfNamePeak    = "../plots/summary/LaserBall_PMT1_Mon_PMT3_-30_PMT4_V_peaks.pdf";
@@ -147,6 +151,11 @@ int main(int argc, char** argv) {
         std::vector<double> pmt1Vals(nEntries), trigVals(nEntries), pmt3Vals, pmt4Vals;
         if (hasPMT3) pmt3Vals.resize(nEntries);
         if (hasPMT4) pmt4Vals.resize(nEntries);
+
+
+        std::string histName = "h_Volts1_" + std::to_string(pw) + "ps";
+        std::string histPeakName = "h_Peaks1_" + std::to_string(pw) + "ps";
+        std::string histSumName = "h_sum4_pmt1_" + std::to_string(pw) + "ps";
 
         // Create histograms (PMT1 full, peaks and sums)
         TH1D* h = new TH1D(histName.c_str(),
@@ -379,12 +388,12 @@ int main(int argc, char** argv) {
         leg->AddEntry(h, legEntryText.c_str(), "l");
 
         c1->cd();
-        leg1->AddEntry(hSum, Form("%d ps: PMT1 mean=%.3f sigma=%.3f", pw, mean1, sigma1).c_str(), "l");
-        if (hasPMT3) leg1->AddEntry(hSum3, Form("%d ps: PMT3 mean=%.3f sigma=%.3f", pw, meanSum3, sigmaSum3).c_str(), "l");
-        if (hasPMT4) leg1->AddEntry(hSum4, Form("%d ps: PMT4 mean=%.3f sigma=%.3f", pw, meanSum4, sigmaSum4).c_str(), "l");
+        leg1->AddEntry(hSum, Form("%d ps: PMT1 mean=%.3f sigma=%.3f", pw, mean1, sigma1), "l");
+        if (hasPMT3) leg1->AddEntry(hSum3, Form("%d ps: PMT3 mean=%.3f sigma=%.3f", pw, meanSum3, sigmaSum3), "l");
+        if (hasPMT4) leg1->AddEntry(hSum4, Form("%d ps: PMT4 mean=%.3f sigma=%.3f", pw, meanSum4, sigmaSum4), "l");
 
         c2->cd();
-        leg2->AddEntry(hPeak, Form("%d ps", pw).c_str(), "l");
+        leg2->AddEntry(hPeak, Form("%d ps", pw), "l");
 
         // Store hist pointers for writing later
         histos.push_back(h);
