@@ -20,7 +20,9 @@
 int main(int argc, char** argv) {
     // ------------ Configuration ------------
     std::vector<int> pulseWidths;
-    for (int pw = 760; pw <= 900; pw += 10) pulseWidths.push_back(pw);
+    for (int pw = 900; pw <= 900; pw += 10) pulseWidths.push_back(pw);
+    pulseWidths.push_back(0);
+
 
     std::string treeNamePMT   = "PMT1data";  // monitor
     std::string treeNameTrig  = "PMT2data";  // trigger
@@ -84,7 +86,7 @@ int main(int argc, char** argv) {
 
     bool firstHist = true;
 
-    std::ofstream outTxt("../results/Monitor_PMT_volts_summary.txt");
+    std::ofstream outTxt("../results/LaserBall_PMT_volts_summary.txt");
     if (!outTxt.is_open()) {
         std::cerr << "Error: could not open output summary for writing\n";
         return 1;
@@ -95,7 +97,9 @@ int main(int argc, char** argv) {
     for (size_t iPW = 0; iPW < pulseWidths.size(); ++iPW) {
         int pw = pulseWidths[iPW];
 
-        std::string fileName = "../data/MonitorPMT/hadded_Monitor_PMT_and_OPM_results_" + std::to_string(pw) + "ps.root";
+        std::string fileName = "../../data/LaserBall/hadded_Monitor_PMT_and_OPM_results_"+ std::to_string(pw)+"ps_0deg.root "
+
+        //"../data/MonitorPMT/hadded_Monitor_PMT_and_OPM_results_" + std::to_string(pw) + "ps.root";
 
         if (gSystem->AccessPathName(fileName.c_str())) {
             std::cerr << "Warning: File not found: " << fileName << std::endl;
