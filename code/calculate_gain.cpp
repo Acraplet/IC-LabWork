@@ -59,11 +59,17 @@ int main(int argc, char** argv) {
 
     std::vector<int> PMT3_cols;
     PMT3_cols.push_back(kBlue+1);
-    PMT3_cols.push_back(kCyan+3);
+    PMT3_cols.push_back(kRed+2);
 
     std::vector<int> PMT4_cols;
-    PMT4_cols.push_back(kGreen+2);
+    PMT4_cols.push_back(kGreen+1);
     PMT4_cols.push_back(kRed+4);
+
+
+    std::vector<double> min_mean = {0.03, 3.31470e-02 , 0.025, 0.045};
+    std::vector<double> max_mean = {0.05, 3.51470e-02 , 0.045, 0.055};
+    std::vector<double> min_std  = {9.7e-03, 6.8706e-03, 9.1e-03, 1.20936e-02};
+    std::vector<double> max_std  = {9.8e-03, 7.06706e-03, 9.3e-03, 1.5936e-02};
 
     // ------------ Separate canvases for 0 ps and 900 ps ------------
     // 0 ps
@@ -90,6 +96,26 @@ int main(int argc, char** argv) {
 
     TLegend* l0_sum   = new TLegend(0.45, 0.50, 0.98, 0.98);
     l0_sum->SetBorderSize(0);  l0_sum->SetFillStyle(0);  l0_sum->SetTextSize(0.025);
+
+
+    TLegend* l1_sum   = new TLegend(0.45, 0.50, 0.98, 0.98);
+    l1_sum->SetBorderSize(0);  l1_sum->SetFillStyle(0);  l1_sum->SetTextSize(0.025);
+
+    TLegend* l2_sum   = new TLegend(0.45, 0.50, 0.98, 0.98);
+    l2_sum->SetBorderSize(0);  l2_sum->SetFillStyle(0);  l2_sum->SetTextSize(0.025);
+
+    TLegend* l3_sum   = new TLegend(0.45, 0.50, 0.98, 0.98);
+    l3_sum->SetBorderSize(0);  l3_sum->SetFillStyle(0);  l3_sum->SetTextSize(0.025);
+
+    std::vector<TLegend*> legends_0;
+    std::vector<TLegend*> legends_1;
+
+    legends_0.push_back(l0_sum);
+    legends_0.push_back(l1_sum);
+    legends_1.push_back(l2_sum);
+    legends_1.push_back(l3_sum);
+
+
 
     // Internal flags to know if first histogram was drawn on a given canvas
     bool drawn0_sum  = false;
@@ -228,8 +254,8 @@ int main(int argc, char** argv) {
 
                 auto computeSum4 = [&](const std::vector<double>& arr, Long64_t idx) {
                     //Simple function that returns the sum of the four points around the peak,
-		    //can modify to only return the peak value or do a fit and give that value
-		    Long64_t i0 = (idx > 0) ? (idx - 1) : idx;
+                    //can modify to only return the peak value or do a fit and give that value
+                    Long64_t i0 = (idx > 0) ? (idx - 1) : idx;
                     Long64_t i1 = idx;
                     Long64_t i2 = (idx + 1 < nEntries) ? (idx + 1) : idx;
                     Long64_t i3 = (idx + 2 < nEntries) ? (idx + 2) : idx;
@@ -237,13 +263,13 @@ int main(int argc, char** argv) {
                 };
 
                 for (size_t ip = 0; ip < periodStarts.size(); ++ip) {
-		    //run over all periods of the laser, finding the peaks and integrating them 
+                    //run over all periods of the laser, finding the peaks and integrating them
                     Long64_t start = periodStarts[ip];
                     Long64_t end   = (ip + 1 < periodStarts.size()) ? periodStarts[ip+1] : nEntries;
                     if (end <= start) continue;
 
                     double peak1 = -1e9; double peak3 = -1e9; double peak4 = -1e9; 
-		    Long64_t idx1 = start; Long64_t idx3 = start; Long64_t idx4 = start;
+                    Long64_t idx1 = start; Long64_t idx3 = start; Long64_t idx4 = start;
                     for (Long64_t i = start; i < end; ++i) {
                         if (pmt1Vals[i] > peak1) { peak1 = pmt1Vals[i]; idx1 = i; }
                         if (pmt3Vals[i] > peak3) { peak3 = pmt3Vals[i]; idx3 = i; }
@@ -255,20 +281,20 @@ int main(int argc, char** argv) {
                 }
 
                 // Fit PMT1 sum fitting the sum with a gaussian might not be optimal
-		// check what i was doing in the previous years.
+                // check what i was doing in the previous years.
                 TF1* gaus1 = new TF1(("gaus1" + tag).c_str(), "gaus", sumMin, sumMax);
 
 
-		TF1* doublegaus3 = new TF1("doubleGaus", "gaus(0)+gaus(3)", sumMin, sumMax);
-		doublegaus3->SetLineColor(PMT3_cols[iPMT]);
-		doublegaus3->SetLineStyle(2);
-		doublegaus3->SetLineWidth(2);
-		
-		
-		TF1* doublegaus4 = new TF1("doubleGaus4", "gaus(0)+gaus(3)", sumMin, sumMax);
-		doublegaus4->SetLineColor(PMT4_cols[iPMT]);
-		doublegaus4->SetLineStyle(2);
-		doublegaus4->SetLineWidth(2);
+                TF1* doublegaus3 = new TF1("doubleGaus", "gaus(0)+gaus(3)", sumMin, sumMax);
+                doublegaus3->SetLineColor(PMT3_cols[iPMT]);
+                doublegaus3->SetLineStyle(2);
+                doublegaus3->SetLineWidth(2);
+
+
+                TF1* doublegaus4 = new TF1("doubleGaus4", "gaus(0)+gaus(3)", sumMin, sumMax);
+                doublegaus4->SetLineColor(PMT4_cols[iPMT]);
+                doublegaus4->SetLineStyle(2);
+                doublegaus4->SetLineWidth(2);
 
 
                 //TF1* gaus3 = new TF1(("gaus3" + tag).c_str(), "gaus", sumMin, sumMax);
@@ -281,29 +307,29 @@ int main(int argc, char** argv) {
                 double mean1  = gaus1->GetParameter(1);
                 double sigma1 = gaus1->GetParameter(2);
 
-		double ped_mean3 = 0.005;
-		double onepe_mean3 = 0.04;
-                
-		doublegaus3->SetParameters(h_sum3->GetMaximum(), ped_mean3, h_sum3->GetRMS(), h_sum3->GetMaximum()/100., onepe_mean3, h_sum3->GetRMS()/2.);
+                double ped_mean3 = 0.005;
+                double onepe_mean3 = (min_mean[iPMT] + max_mean[iPMT])/2;
+                double onepe_std3 = (min_std[iPMT] + max_std[iPMT])/2;
 
-		h_sum3->Fit(doublegaus3, "Q0");
-		
+                doublegaus3->SetParameters(h_sum3->GetMaximum(), ped_mean3, h_sum3->GetRMS(), h_sum3->GetMaximum()/100., onepe_mean3, onepe_std3);
+
+                h_sum3->Fit(doublegaus3, "Q0");
                 double meanSum3     = doublegaus3->GetParameter(1);
                 double sigmaSum3    = doublegaus3->GetParameter(2);
                 double mean1peSum3  = doublegaus3->GetParameter(4);
                 double sigma1peSum3  = doublegaus3->GetParameter(5);
-                doublegaus3->SetParLimits(4, 0.025, 0.08);
-                doublegaus3->SetParLimits(5, 0.015, 0.05);
+                doublegaus3->SetParLimits(4, min_mean[iPMT], max_mean[iPMT]);
+                doublegaus3->SetParLimits(5, min_std[iPMT], max_std[iPMT]);
                 
-		double ped_mean4 = 0.013;
-		double onepe_mean4 = 0.04;
-		double onepe_std4 = 0.04;
-		doublegaus4->SetParameters(h_sum4->GetMaximum(), ped_mean4, h_sum4->GetRMS(), h_sum4->GetMaximum()/100., onepe_mean4, onepe_std4);
+                double ped_mean4 = 0.013;
+                double onepe_mean4 = (min_mean[iPMT+2] + max_mean[iPMT+2])/2;
+                double onepe_std4 = (min_std[iPMT+2] + max_std[iPMT+2])/2;
+                doublegaus4->SetParameters(h_sum4->GetMaximum(), ped_mean4, h_sum4->GetRMS(), h_sum4->GetMaximum()/100., onepe_mean4, onepe_std4);
 
 //                gaus4->SetParameters(h_sum4->GetMaximum(), h_sum4->GetMean(), h_sum4->GetRMS());
                 h_sum4->Fit(doublegaus4, "Q0");
-                doublegaus4->SetParLimits(4, 0.025, 0.08);
-                doublegaus4->SetParLimits(5, 0.015, 0.05);
+                doublegaus4->SetParLimits(4, min_mean[iPMT+2], max_mean[iPMT+2]);
+                doublegaus4->SetParLimits(5, min_std[iPMT+2], max_std[iPMT+2]);
                 double meanSum4     = doublegaus3->GetParameter(1);
                 double sigmaSum4    = doublegaus4->GetParameter(2);
                 double mean1peSum4  = doublegaus4->GetParameter(4);
@@ -322,7 +348,7 @@ int main(int argc, char** argv) {
 
 
                 // Sums
-                c0_sum[iPMT]->cd();
+                c0_sum[iPMT].cd();
                 
                 if (!drawn0_sum) {
                     h_sum3->SetTitle("Sum4 at 0 ps;sum4 [V];entries");
@@ -333,13 +359,13 @@ int main(int argc, char** argv) {
                     h_sum3->Draw("HIST SAME");
                     doublegaus3->Draw("SAME");
                 }
-                l0_sum->AddEntry(h_sum3,
+                legends_0[iPMT]->AddEntry(h_sum3,
                                  Form("%s (ped mean=%.3f, ped #sigma=%.3f, 1PE mean=%.3f, 1PE #sigma=%.3f)", labPMT3.c_str(), meanSum3, sigmaSum3, mean1peSum3, sigma1peSum3),
                                  "l");
 
-                c1_sum[iPMT]->cd();
+                c1_sum[iPMT].cd();
                 h_sum4->Draw("HIST SAME");
-                l0_sum->AddEntry(h_sum4,
+                legends_1[iPMT]->AddEntry(h_sum4,
                                  Form("%s (ped mean=%.3f, ped #sigma=%.3f, 1PE mean=%.3f, 1PE #sigma=%.3f)", labPMT4.c_str(), meanSum4, sigmaSum4, mean1peSum4, sigma1peSum4),
                                  "l");
                 doublegaus4->Draw("SAME");
@@ -369,10 +395,14 @@ int main(int argc, char** argv) {
 
     // ===================== SAVE CANVASES =====================
 
+    for (int i=0; i<2; i++){
+        canvases_0[i]->cd();   legends_0[i]->Draw();
+        canvases_0[i]->SaveAs(Form("../plots/summary/LaserBall_darkrate_0ps_Sum4Points_PMT%i.pdf", i));
+        canvases_1[i]->cd();   legends_1[i]->Draw();
+        canvases_1[i]->SaveAs(Form("../plots/summary/LaserBall_darkrate_0ps_Sum4Points_PMT%i.pdf", i+2));
+    }
 
-    // Draw legends & save PDFs for 0 ps
-    c0_sum->cd();   l0_sum->Draw();
-    c0_sum->SaveAs("../plots/summary/LaserBall_darkrate_0ps_Sum4Points.pdf");
+
     // ===================== SAVE ROOT FILE =====================
 
     TFile* outFile = TFile::Open(outputRootName.c_str(), "RECREATE");
@@ -380,7 +410,14 @@ int main(int argc, char** argv) {
         std::cerr << "Error: could not create output ROOT file: " << outputRootName << std::endl;
     } else {
         outFile->cd();
-        c0_sum->Write("c0_sum");
+
+        // Draw legends & save PDFs for 0 ps
+
+
+        for (int i=0; i<2; i++){
+            canvases_0[i]->Write(Form("c%i_sum"), i);
+            canvases_1[i]->Write(Form("c%i_sum"), i+2);
+        }
 
         for (auto* h : allHists) {
             if (h) h->Write();
