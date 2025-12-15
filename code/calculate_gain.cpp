@@ -65,11 +65,11 @@ int main(int argc, char** argv) {
     PMT4_cols.push_back(kGreen+1);
     PMT4_cols.push_back(kRed+4);
 
-
-    std::vector<double> min_mean = {0.03, 3.31470e-02 , 0.025, 0.045};
-    std::vector<double> max_mean = {0.05, 3.51470e-02 , 0.045, 0.055};
-    std::vector<double> min_std  = {9.7e-03, 6.8706e-03, 9.1e-03, 1.20936e-02};
-    std::vector<double> max_std  = {9.8e-03, 7.06706e-03, 9.3e-03, 1.5936e-02};
+    //The order here is PMT3 (-30) PMT3(H) PMT4(V) PMT4(+30)
+    std::vector<double> min_mean = {0.03, 0.025, 3.31470e-02,  0.045};
+    std::vector<double> max_mean = {0.05, 0.045, 3.51470e-02, 0.055};
+    std::vector<double> min_std  = {9.7e-03, 9.1e-03,  6.8706e-03, 1.20936e-02};
+    std::vector<double> max_std  = {9.8e-03,  9.3e-03, 8.06706e-03, 1.5936e-02};
 
     // ------------ Separate canvases for 0 ps and 900 ps ------------
     // 0 ps
@@ -94,17 +94,17 @@ int main(int argc, char** argv) {
     canvases_1.push_back(c2_sum);
     canvases_1.push_back(c3_sum);
 
-    TLegend* l0_sum   = new TLegend(0.45, 0.50, 0.98, 0.98);
+    TLegend* l0_sum   = new TLegend(0.25, 0.50, 0.98, 0.98);
     l0_sum->SetBorderSize(0);  l0_sum->SetFillStyle(0);  l0_sum->SetTextSize(0.025);
 
 
-    TLegend* l1_sum   = new TLegend(0.45, 0.50, 0.98, 0.98);
+    TLegend* l1_sum   = new TLegend(0.25, 0.50, 0.98, 0.98);
     l1_sum->SetBorderSize(0);  l1_sum->SetFillStyle(0);  l1_sum->SetTextSize(0.025);
 
-    TLegend* l2_sum   = new TLegend(0.45, 0.50, 0.98, 0.98);
+    TLegend* l2_sum   = new TLegend(0.25, 0.50, 0.98, 0.98);
     l2_sum->SetBorderSize(0);  l2_sum->SetFillStyle(0);  l2_sum->SetTextSize(0.025);
 
-    TLegend* l3_sum   = new TLegend(0.45, 0.50, 0.98, 0.98);
+    TLegend* l3_sum   = new TLegend(0.25, 0.50, 0.98, 0.98);
     l3_sum->SetBorderSize(0);  l3_sum->SetFillStyle(0);  l3_sum->SetTextSize(0.025);
 
     std::vector<TLegend*> legends_0;
@@ -304,7 +304,9 @@ int main(int argc, char** argv) {
                 gaus1->SetLineStyle(2);
                 gaus1->SetLineWidth(2);
                 h_sum1->Fit(gaus1, "Q0");
-                double mean1  = gaus1->GetParameter(1);
+                
+		        std::cout << "Doing the fits" << std::endl;
+		        double mean1  = gaus1->GetParameter(1);
                 double sigma1 = gaus1->GetParameter(2);
 
                 double ped_mean3 = 0.005;
@@ -313,13 +315,13 @@ int main(int argc, char** argv) {
 
                 doublegaus3->SetParameters(h_sum3->GetMaximum(), ped_mean3, h_sum3->GetRMS(), h_sum3->GetMaximum()/100., onepe_mean3, onepe_std3);
 
+                doublegaus3->SetParLimits(4, min_mean[iPMT], max_mean[iPMT]);
+                doublegaus3->SetParLimits(5, min_std[iPMT], max_std[iPMT]);
                 h_sum3->Fit(doublegaus3, "Q0");
                 double meanSum3     = doublegaus3->GetParameter(1);
                 double sigmaSum3    = doublegaus3->GetParameter(2);
                 double mean1peSum3  = doublegaus3->GetParameter(4);
                 double sigma1peSum3  = doublegaus3->GetParameter(5);
-                doublegaus3->SetParLimits(4, min_mean[iPMT], max_mean[iPMT]);
-                doublegaus3->SetParLimits(5, min_std[iPMT], max_std[iPMT]);
                 
                 double ped_mean4 = 0.013;
                 double onepe_mean4 = (min_mean[iPMT+2] + max_mean[iPMT+2])/2;
@@ -327,9 +329,9 @@ int main(int argc, char** argv) {
                 doublegaus4->SetParameters(h_sum4->GetMaximum(), ped_mean4, h_sum4->GetRMS(), h_sum4->GetMaximum()/100., onepe_mean4, onepe_std4);
 
 //                gaus4->SetParameters(h_sum4->GetMaximum(), h_sum4->GetMean(), h_sum4->GetRMS());
-                h_sum4->Fit(doublegaus4, "Q0");
                 doublegaus4->SetParLimits(4, min_mean[iPMT+2], max_mean[iPMT+2]);
                 doublegaus4->SetParLimits(5, min_std[iPMT+2], max_std[iPMT+2]);
+                h_sum4->Fit(doublegaus4, "Q0");
                 double meanSum4     = doublegaus3->GetParameter(1);
                 double sigmaSum4    = doublegaus4->GetParameter(2);
                 double mean1peSum4  = doublegaus4->GetParameter(4);
@@ -346,9 +348,10 @@ int main(int argc, char** argv) {
                 std::string labPMT3 = laserPosStr + PMT3_name + " PMT";
                 std::string labPMT4 = laserPosStr + PMT4_name + " PMT";
 
+		        std::cout << "Finished the fits" << std::endl;
 
                 // Sums
-                c0_sum[iPMT].cd();
+                canvases_0[iPMT]->cd();
                 
                 if (!drawn0_sum) {
                     h_sum3->SetTitle("Sum4 at 0 ps;sum4 [V];entries");
@@ -363,7 +366,7 @@ int main(int argc, char** argv) {
                                  Form("%s (ped mean=%.3f, ped #sigma=%.3f, 1PE mean=%.3f, 1PE #sigma=%.3f)", labPMT3.c_str(), meanSum3, sigmaSum3, mean1peSum3, sigma1peSum3),
                                  "l");
 
-                c1_sum[iPMT].cd();
+                canvases_1[iPMT]->cd();
                 h_sum4->Draw("HIST SAME");
                 legends_1[iPMT]->AddEntry(h_sum4,
                                  Form("%s (ped mean=%.3f, ped #sigma=%.3f, 1PE mean=%.3f, 1PE #sigma=%.3f)", labPMT4.c_str(), meanSum4, sigmaSum4, mean1peSum4, sigma1peSum4),
@@ -397,9 +400,9 @@ int main(int argc, char** argv) {
 
     for (int i=0; i<2; i++){
         canvases_0[i]->cd();   legends_0[i]->Draw();
-        canvases_0[i]->SaveAs(Form("../plots/summary/LaserBall_darkrate_0ps_Sum4Points_PMT%i.pdf", i));
+        canvases_0[i]->SaveAs(Form("../plots/summary/LaserBall_darkrate_0ps_Sum4Points_%c.pdf", PMT3_list[i]));
         canvases_1[i]->cd();   legends_1[i]->Draw();
-        canvases_1[i]->SaveAs(Form("../plots/summary/LaserBall_darkrate_0ps_Sum4Points_PMT%i.pdf", i+2));
+        canvases_1[i]->SaveAs(Form("../plots/summary/LaserBall_darkrate_0ps_Sum4Points_%c.pdf", PMT4_list[i]));
     }
 
 
@@ -414,10 +417,12 @@ int main(int argc, char** argv) {
         // Draw legends & save PDFs for 0 ps
 
 
-        for (int i=0; i<2; i++){
-            canvases_0[i]->Write(Form("c%i_sum"), i);
-            canvases_1[i]->Write(Form("c%i_sum"), i+2);
-        }
+
+        canvases_0[0]->Write(Form("c1_sum"));
+        canvases_0[1]->Write(Form("c2_sum"));
+        canvases_1[0]->Write(Form("c3_sum"));
+        canvases_1[1]->Write(Form("c4_sum"));
+
 
         for (auto* h : allHists) {
             if (h) h->Write();
