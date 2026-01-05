@@ -31,6 +31,9 @@ int main(int argc, char** argv) {
     std::vector<std::string> PMT3_list = {"-30", "H"};
     std::vector<std::string> PMT4_list = {"V", "+30"};
 
+    std::vector<std::string> PMT3_list_names = {"m30", "H"};
+    std::vector<std::string> PMT4_list_names = {"V", "p30"};
+
     std::string treeNamePMT   = "PMT1data";
     std::string treeNameTrig  = "PMT2data";
     std::string treeNamePMT3  = "PMT3data";
@@ -44,7 +47,7 @@ int main(int argc, char** argv) {
 
 
     std::string outputRootName =
-        Form("../results/LaserBall_calibration_allAngles_%dps_full.root", pulseWidths[0]);
+        Form("../results/LaserBall_calibration_allAngles_%dps_withTTree.root", pulseWidths[0]);
 
     gStyle->SetOptStat(1111111);
 
@@ -73,6 +76,9 @@ int main(int argc, char** argv) {
                 std::string PMT3_name = PMT3_list[iPMT];
                 std::string PMT4_name = PMT4_list[iPMT];
 
+                std::string PMT3_name_out = PMT3_list_names[iPMT];
+                std::string PMT4_name_out = PMT4_list_names[iPMT];
+
                 std::string fileName =
                     "/vols/hyperk/540PC/171225/hadded_PMT1_Mon_PMT2_Trig_PMT3_" +
                     PMT3_name + "_PMT4_" + PMT4_name +
@@ -84,6 +90,10 @@ int main(int argc, char** argv) {
                     continue;
                 }
 
+
+                TTree* pulseTree = new TTree(Form("pulseTree_%i", iPMT), "Per-pulse peak data");
+                pulseTree->SetDirectory(angleDir);
+
                 TFile* f = TFile::Open(fileName.c_str(), "READ");
                 if (!f || f->IsZombie()) continue;
 
@@ -91,6 +101,10 @@ int main(int argc, char** argv) {
                 TTree* tTrig = (TTree*)f->Get(treeNameTrig.c_str());
                 TTree* tPMT3 = (TTree*)f->Get(treeNamePMT3.c_str());
                 TTree* tPMT4 = (TTree*)f->Get(treeNamePMT4.c_str());
+
+                
+
+                
 
                 if (!tPMT1 || !tTrig || !tPMT3 || !tPMT4) {
                     f->Close();
@@ -152,6 +166,22 @@ int main(int argc, char** argv) {
                     if (tr[i-1]<thr && tr[i]>=thr)
                         starts.push_back(i);
 
+
+                //for each PMT the sum of the four points around the peak 
+                double s1;
+                double s3;
+                double s4;
+
+
+                pulseTree->Branch("angle", &ang, "angle/I");
+                pulseTree->Branch(Form("PMT1_Monitor_%i", iPMT),   &s1,    "mon/D");
+                pulseTree->Branch(("PMT3_"+PMT3_name_out).c_str(),  &s3,    "pmt3/D");
+                pulseTree->Branch(("PMT4_"+PMT4_name_out).c_str(),  &s4,    "pmt4/D");
+
+
+                angleDir->cd();   
+
+
                 for (size_t ip=0; ip<starts.size(); ip++) {
                     //look at each individual period
                     Long64_t s = starts[ip];
@@ -165,24 +195,30 @@ int main(int argc, char** argv) {
                         if (p3[i]>m3){m3=p3[i]; i3=i;}
                         if (p4[i]>m4){m4=p4[i]; i4=i;}
                     }
-                    double s1 = std::max(sum4(p1,i1), 1e-9);
-                    double s3 = sum4(p3,i3);
-                    double s4 = sum4(p4,i4);
+                    s1 = std::max(sum4(p1,i1), 1e-9);
+                    s3 = sum4(p3,i3);
+                    s4 = sum4(p4,i4);
                     h1->Fill(s1);
                     h3->Fill(s3);
                     h4->Fill(s4);
                     h3_norm->Fill(std::min(s3/s1, 999.));
                     h4_norm->Fill(std::min(s4/s1, 999.));
+                    pulseTree->Fill();
+
+
 
                 }
 
+                // pulseTree->Write();
+
                 // -------- PMT directories --------
                 angleDir->cd();
-                TDirectory* d1 = angleDir->mkdir(("PMT1_"+PMT3_name).c_str());
-                TDirectory* d3 = angleDir->mkdir(("PMT3_"+PMT3_name).c_str());
-                TDirectory* d4 = angleDir->mkdir(("PMT4_"+PMT4_name).c_str());
-                TDirectory* d3_norm = angleDir->mkdir(("PMT3_"+PMT3_name+"_norm").c_str());
-                TDirectory* d4_norm = angleDir->mkdir(("PMT4_"+PMT4_name+"_norm").c_str());
+                TDirectory* d1 = angleDir->mkdir(Form("PMT1_Monitor_%i", iPMT));
+                TDirectory* d3 = angleDir->mkdir(("PMT3_"+PMT3_name_out).c_str());
+                TDirectory* d4 = angleDir->mkdir(("PMT4_"+PMT4_name_out).c_str());
+                TDirectory* d3_norm = angleDir->mkdir(("PMT3_"+PMT3_name_out+"_norm").c_str());
+                TDirectory* d4_norm = angleDir->mkdir(("PMT4_"+PMT4_name_out+"_norm").c_str());
+                
 
 
                 // -------- Write PMT1 --------
@@ -199,48 +235,48 @@ int main(int argc, char** argv) {
 
                 // -------- Write PMT3 --------
                 d3->cd();
-                h3->Write(Form("PMT %s: %d deg",PMT3_name.c_str(), ang));
+                h3->Write(Form("PMT %s: %d deg",PMT3_name_out.c_str(), ang));
 
                 TLegend* l3 = new TLegend(0.15,0.65,0.9,0.9);
                 l3->SetBorderSize(0);
                 l3->SetFillStyle(0);
-                l3->AddEntry(h3, Form("PMT %s: %d deg",PMT3_name.c_str(), ang), "l");
+                l3->AddEntry(h3, Form("PMT %s: %d deg",PMT3_name_out.c_str(), ang), "l");
                 l3->AddEntry((TObject*)0,
                     Form("Integral = %.0f", h3->Integral()), "");
                 l3->Write("legend");
 
                 // -------- Write PMT4 --------
                 d4->cd();
-                h4->Write(Form("PMT %s: %d deg",PMT4_name.c_str(), ang));
+                h4->Write(Form("PMT %s: %d deg",PMT4_name_out.c_str(), ang));
 
                 TLegend* l4 = new TLegend(0.15,0.65,0.9,0.9);
                 l4->SetBorderSize(0);
                 l4->SetFillStyle(0);
-                l4->AddEntry(h4, Form("PMT %s: %d deg",PMT4_name.c_str(), ang), "l");
+                l4->AddEntry(h4, Form("PMT %s: %d deg",PMT4_name_out.c_str(), ang), "l");
                 l4->AddEntry((TObject*)0,
                     Form("Integral = %.0f", h4->Integral()), "");
                 l4->Write("legend");
 
                 // -------- Write PMT3 divided by monitor PMT --------
                 d3_norm->cd();
-                h3_norm->Write(Form("PMT %s norm. to mon.: %d deg",PMT3_name.c_str(), ang));
+                h3_norm->Write(Form("PMT %s norm. to mon.: %d deg",PMT3_name_out.c_str(), ang));
 
                 TLegend* l3_norm = new TLegend(0.15,0.65,0.9,0.9);
                 l3_norm->SetBorderSize(0);
                 l3_norm->SetFillStyle(0);
-                l3_norm->AddEntry(h3_norm, Form("PMT %s norm. to mon.: %d deg",PMT3_name.c_str(), ang), "l");
+                l3_norm->AddEntry(h3_norm, Form("PMT %s norm. to mon.: %d deg",PMT3_name_out.c_str(), ang), "l");
                 l3_norm->AddEntry((TObject*)0,
                     Form("Integral = %.0f", h3_norm->Integral()), "");
                 l3_norm->Write("legend");
 
                 // -------- Write PMT4 divided by monitor PMT --------
                 d4_norm->cd();
-                h4_norm->Write(Form("PMT %s norm. to mon.: %d deg",PMT4_name.c_str(),ang));
+                h4_norm->Write(Form("PMT %s norm. to mon.: %d deg",PMT4_name_out.c_str(),ang));
 
                 TLegend* l4_norm = new TLegend(0.15,0.65,0.9,0.9);
                 l4_norm->SetBorderSize(0);
                 l4_norm->SetFillStyle(0);
-                l4_norm->AddEntry(h4_norm, Form("PMT %s norm. to mon.: %d deg",PMT4_name.c_str(), ang), "l");
+                l4_norm->AddEntry(h4_norm, Form("PMT %s norm. to mon.: %d deg",PMT4_name_out.c_str(), ang), "l");
                 l4_norm->AddEntry((TObject*)0,
                     Form("Integral = %.0f", h4_norm->Integral()), "");
                 l4_norm->Write("legend");
