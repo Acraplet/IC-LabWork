@@ -99,7 +99,7 @@ void plotLaserBallMap() {
 
     TH2D* hMap = new TH2D(
         "LaserBallMap",
-        "Average number of PE per Trigger (cut);PMT position;Angle",
+        "Average number of PE per Trigger \n normalised to Monitor (3sig. ped. cut);PMT position;Angle",
                           pmtDirs.size(), 0, pmtDirs.size(),
                           angles.size(), 0, angles.size()
     );
@@ -269,7 +269,7 @@ void plotLaserBallMap() {
 
 
 
-                hMap->SetBinContent(ip+1, ia+1, sum_entries/nEntries);
+                hMap->SetBinContent(ip+1, ia+1, sum_entries_normalised/nEntries);
             }
 
             //here we are reading the entries, we'll have to normalise to 1pe before dividing 
