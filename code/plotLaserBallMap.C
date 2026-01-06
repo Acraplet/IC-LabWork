@@ -58,6 +58,7 @@ void plotLaserBallMap() {
 
     };
 
+    //This is 3sigma away from pedestal 
     std::vector<double> pmtIntLims = {
         0.0021896,
         0.0031439,
@@ -239,7 +240,7 @@ void plotLaserBallMap() {
                 double value_Monitor;
                 std::cout << pmtDirs_raw[ip].c_str() << " " << tree_name[ip] << std::endl;
 
-
+                //PMT branch name
                 const char* brName = pmtDirs_raw[ip].c_str();
 
                 TBranch* br = T->GetBranch(brName);
