@@ -11,6 +11,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
+#include "TH2D.h"
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TLegend.h"
@@ -26,13 +27,13 @@ int main(int argc, char** argv) {
     // ================= CONFIGURATION =================
 
     std::vector<int> pulseWidths = {810};
-    std::vector<int> angleLaserBall = {0, 90, 180, -90};   // ADD MORE ANGLES HERE
+    std::vector<int> angleLaserBall = {0, 90, 180, -90}; //, 90, 180, -90};   // ADD MORE ANGLES HERE
 
     std::vector<std::string> PMT3_list = {"-30", "H"};
     std::vector<std::string> PMT4_list = {"V", "+30"};
 
     std::vector<std::string> PMT3_list_names = {"m30", "H"};
-    std::vector<std::string> PMT4_list_names = {"V", "p30"};
+    std::vector<std::string> PMT4_list_names =  {"V", "p30"};
 
     std::string treeNamePMT   = "PMT1data";
     std::string treeNameTrig  = "PMT2data";
@@ -40,14 +41,17 @@ int main(int argc, char** argv) {
     std::string treeNamePMT4  = "PMT4data";
     std::string branchName    = "volts";
 
-    int    nBinsSum = 400;
+    int    nBinsSum = 75;
     double sumMin   = -0.02;
     double sumMax   =  0.20;
     double monitorMax = 0.5;
 
+    double tMin   = 0.;
+    double tMax   = 10000.;
+
 
     std::string outputRootName =
-        Form("../results/LaserBall_calibration_allAngles_%dps_withTTree.root", pulseWidths[0]);
+        Form("../results/LaserBall_calibration_allAngles_%dps_060126_testWithTimes.root", pulseWidths[0]);
 
     gStyle->SetOptStat(1111111);
 
@@ -79,11 +83,26 @@ int main(int argc, char** argv) {
                 std::string PMT3_name_out = PMT3_list_names[iPMT];
                 std::string PMT4_name_out = PMT4_list_names[iPMT];
 
+                //17/12 data which had too fine y bining
+                // std::string fileName =
+                //     "/vols/hyperk/540PC/171225/hadded_PMT1_Mon_PMT2_Trig_PMT3_" +
+                //     PMT3_name + "_PMT4_" + PMT4_name +
+                //     "_results_" + std::to_string(pw) +
+                //     "ps_" + std::to_string(ang) + "deg.root";
+
+                //06/01 dataset, should be good: 20mV/div 
                 std::string fileName =
-                    "/vols/hyperk/540PC/171225/hadded_PMT1_Mon_PMT2_Trig_PMT3_" +
+                    "/vols/hyperk/540PC/WCTE540/2025_characterisations/data/LaserBall/6126/hadded_PMT1_Mon_PMT2_Trig_PMT3_" +
                     PMT3_name + "_PMT4_" + PMT4_name +
                     "_results_" + std::to_string(pw) +
                     "ps_" + std::to_string(ang) + "deg.root";
+
+                //07/01 tests
+                // std::string fileName =
+                //     "/vols/hyperk/users/ac4317/WCTE540/2025_LB_characterisation/IC-LabWork/data/hadded_PMT1_Mon_PMT2_Trig_PMT3_" +
+                //     PMT3_name + "_PMT4_" + PMT4_name +
+                //     "_results_" + std::to_string(pw) +
+                //     "ps_" + std::to_string(ang) + "deg.root";
 
                 if (gSystem->AccessPathName(fileName.c_str())) {
                     std::cerr << "Missing file: " << fileName << std::endl;
@@ -111,6 +130,8 @@ int main(int argc, char** argv) {
                     continue;
                 }
 
+
+                // Long64_t nEntries = 5000000;
                 Long64_t nEntries = std::min(
                     std::min(tPMT1->GetEntries(), tTrig->GetEntries()),
                     std::min(tPMT3->GetEntries(), tPMT4->GetEntries())
@@ -144,6 +165,11 @@ int main(int argc, char** argv) {
                                     nBinsSum, sumMin, sumMax/monitorMax);
                 TH1D* h4_norm = new TH1D("h4_sum4_norm", Form("PMT %s sum4 div. mon. PMT", PMT4_name.c_str()),
                                     nBinsSum, sumMin, sumMax/monitorMax);
+                
+                TH2D* h3_qt = new TH2D("h3_sum3_t", Form("PMT %s sum4 vs T", PMT3_name.c_str()),
+                                    nBinsSum, tMin, tMax, nBinsSum, sumMin, sumMax);
+                TH2D* h4_qt = new TH2D("h4_sum4_t", Form("PMT %s sum4 vs T", PMT4_name.c_str()),
+                                    nBinsSum, tMin, tMax, nBinsSum, sumMin, sumMax);
                 h1->SetDirectory(nullptr);
                 h3->SetDirectory(nullptr);
                 h4->SetDirectory(nullptr);
@@ -172,15 +198,24 @@ int main(int argc, char** argv) {
                 double s3;
                 double s4;
 
+                int hit_index3;
+                int hit_index4;
+               
+
 
                 pulseTree->Branch("angle", &ang, "angle/I");
                 pulseTree->Branch(Form("PMT1_Monitor_%i", iPMT),   &s1,    "mon/D");
                 pulseTree->Branch(("PMT3_"+PMT3_name_out).c_str(),  &s3,    "pmt3/D");
                 pulseTree->Branch(("PMT4_"+PMT4_name_out).c_str(),  &s4,    "pmt4/D");
+                //a branch keeping track of the number of samples since the start time of laser trigger
+                pulseTree->Branch(("PMT3_"+PMT3_name_out+"hit_index").c_str(),  &hit_index3,    "pmt3hitID/I");
+                pulseTree->Branch(("PMT4_"+PMT4_name_out+"hit_index").c_str(),  &hit_index4,    "pmt4hitID/I");
 
 
-                angleDir->cd();   
 
+                angleDir->cd();  
+
+                
 
                 for (size_t ip=0; ip<starts.size(); ip++) {
                     //look at each individual period
@@ -192,20 +227,24 @@ int main(int argc, char** argv) {
                     //find the maximums 
                     for (Long64_t i=s;i<e;i++) {
                         if (p1[i]>m1){m1=p1[i]; i1=i;}
-                        if (p3[i]>m3){m3=p3[i]; i3=i;}
-                        if (p4[i]>m4){m4=p4[i]; i4=i;}
+                        if (p3[i]>m3){m3=p3[i]; i3=i; hit_index3=i-s;}
+                        if (p4[i]>m4){m4=p4[i]; i4=i; hit_index4=i-s;}
                     }
+
+
+
                     s1 = std::max(sum4(p1,i1), 1e-9);
                     s3 = sum4(p3,i3);
                     s4 = sum4(p4,i4);
                     h1->Fill(s1);
                     h3->Fill(s3);
+                    
                     h4->Fill(s4);
+                    h3_qt->Fill(hit_index3, s3);
+                    h4_qt->Fill(hit_index4, s4);
                     h3_norm->Fill(std::min(s3/s1, 999.));
                     h4_norm->Fill(std::min(s4/s1, 999.));
                     pulseTree->Fill();
-
-
 
                 }
 
@@ -237,6 +276,8 @@ int main(int argc, char** argv) {
                 d3->cd();
                 h3->Write(Form("PMT %s: %d deg",PMT3_name_out.c_str(), ang));
 
+                h3_qt->Write(Form("PMT %s: %d deg vs T",PMT3_name_out.c_str(), ang));
+
                 TLegend* l3 = new TLegend(0.15,0.65,0.9,0.9);
                 l3->SetBorderSize(0);
                 l3->SetFillStyle(0);
@@ -245,9 +286,12 @@ int main(int argc, char** argv) {
                     Form("Integral = %.0f", h3->Integral()), "");
                 l3->Write("legend");
 
+
+
                 // -------- Write PMT4 --------
                 d4->cd();
                 h4->Write(Form("PMT %s: %d deg",PMT4_name_out.c_str(), ang));
+                h4_qt->Write(Form("PMT %s: %d deg vs T",PMT4_name_out.c_str(), ang));
 
                 TLegend* l4 = new TLegend(0.15,0.65,0.9,0.9);
                 l4->SetBorderSize(0);
