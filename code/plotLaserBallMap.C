@@ -17,9 +17,9 @@ void plotLaserBallMap() {
     // ---------- Configuration ----------
 
     std::string filename =
-    "../results/LaserBall_calibration_allAngles_810ps_withTTree.root";
+    "../results/LaserBall_calibration_allAngles_810ps_060126_test.root";
 
-    std::vector<int> angles = {0, 90, 180, -90};
+    std::vector<int> angles = {0, 90, 180, -90}; //, 90, 180, -90};
 
     // Order matters: defines the map layout
     std::vector<std::string> pmtDirs = {
@@ -30,6 +30,14 @@ void plotLaserBallMap() {
 
     };
 
+    // std::vector<std::string> pmtDirs = {
+    //     // "PMT3_m30_norm",
+    //     "PMT3_V_norm",
+    //     // "PMT4_p30_norm",
+    //     "PMT4_H_norm",
+    //
+    // };
+
     std::vector<std::string> pmtDirs_raw = {
         "PMT3_m30",
         "PMT3_H",
@@ -37,6 +45,14 @@ void plotLaserBallMap() {
         "PMT4_V",
 
     };
+
+    // std::vector<std::string> pmtDirs_raw = {
+    //     // "PMT3_m30",
+    //     "PMT3_V",
+    //     // "PMT4_p30",
+    //     "PMT4_H",
+    //
+    // };
 
     //actually we should read the TTree with the entries, fit it with gaussians and then extract the gain. Does it have to be stable ? not really ? Maybe print out the values, just to ensure it's ok 
 
@@ -58,6 +74,41 @@ void plotLaserBallMap() {
 
     };
 
+    std::vector<double> pmtPedestal_guess= {
+        -0.00225594,
+        0.00430222,
+        -0.00223834,
+        -0.000889318,
+
+    };
+
+    std::vector<double> pmtPedestalSigma_guess = {
+        0.00124378,
+        0.0031439,
+        0.002301,
+        0.00215996,
+
+    };
+
+    std::vector<double> pmt1pe_guess= {
+        0.0215314,
+        0.0215314,
+        0.0421041,
+        0.0215314,
+
+    };
+
+    std::vector<double> pmt1peSigma_guess= {
+        0.00867978,
+        0.00867978,
+        0.012777,
+        0.00867978,
+
+    };
+
+
+
+
     std::vector<double> pmtIntLims = {
         0.0021896,
         0.0031439,
@@ -74,6 +125,14 @@ void plotLaserBallMap() {
 
     };
 
+    // std::vector<std::string> tree_name = {
+    //     // "pulseTree_0",
+    //     "pulseTree_0",
+    //     // "pulseTree_0",
+    //     "pulseTree_0",
+    //
+    // };
+
 
     std::vector<std::string> monitor_raw = {
         "PMT1_Monitor_0",
@@ -82,6 +141,14 @@ void plotLaserBallMap() {
         "PMT1_Monitor_0",
 
     };
+
+    // std::vector<std::string> monitor_raw = {
+    //     // "PMT1_Monitor_0",
+    //     "PMT1_Monitor_0",
+    //     // "PMT1_Monitor_0",
+    //     "PMT1_Monitor_0",
+    //
+    // };
 
 
 
@@ -128,10 +195,6 @@ void plotLaserBallMap() {
                 continue;
             }
 
-            
-
-
-
             for (size_t ip = 0; ip < pmtDirs.size(); ++ip) {
 
                 TDirectory* d =
@@ -166,28 +229,28 @@ void plotLaserBallMap() {
                     continue;
                 }
                 //Fit the histogram with two gaussians
-                TF1* doublegaus = new TF1("doubleGaus", "gaus(0)+gaus(3)", 0.0, 0.1);
+                TF1* doublegaus = new TF1("doubleGaus", "gaus(0)+gaus(3)", -0.05, 0.1);
 
                 // Inititalise the fit
                 doublegaus->SetParameters(
-                    h->GetMaximum(), 0.0037, 0.0001,
-                                          h->GetMaximum()*0.01, 0.04, 0.01
+                    h->GetMaximum(), pmtPedestal_guess[ip], pmtPedestalSigma_guess[ip],
+                                          h->GetMaximum()*0.01, pmt1pe_guess[ip], pmt1peSigma_guess[ip]
                 );
 
-                //V
-                if (ip == 3) doublegaus->SetParameters(
-                    h->GetMaximum(), 0.005, 0.002, h->GetMaximum()*0.01, 0.026, 0.007
-                );
-
-                //p30
-                if (ip == 2) doublegaus->SetParameters(
-                    h->GetMaximum(), 0.0047, 0.002, h->GetMaximum()*0.01, 0.047, 0.0136
-                );
-
-                //H
-                if (ip == 1) doublegaus->SetParameters(
-                    h->GetMaximum(), 0.0046, 0.0012, h->GetMaximum()*0.01, 0.0332, 0.010
-                );
+                // //V
+                // if (ip == 3) doublegaus->SetParameters(
+                //     h->GetMaximum(), pmtPedestal_guess[ip], pmtPedestalSigma_guess[ip], h->GetMaximum()*0.01, 0.026, 0.007
+                // );
+                //
+                // //p30
+                // if (ip == 2) doublegaus->SetParameters(
+                //     h->GetMaximum(), pmtPedestal_guess[ip], pmtPedestalSigma_guess[ip], h->GetMaximum()*0.01, 0.047, 0.0136
+                // );
+                //
+                // //H
+                // if (ip == 1) doublegaus->SetParameters(
+                //     h->GetMaximum(), pmtPedestal_guess[ip], pmtPedestalSigma_guess[ip], h->GetMaximum()*0.01, 0.0332, 0.010
+                // );
 
 
                 TFitResultPtr res = h->Fit(doublegaus, "SRQ0");
@@ -285,5 +348,5 @@ void plotLaserBallMap() {
 
         hMap->Draw("COLZ TEXT");
 
-        c->SaveAs("LaserBallMap.png");
+        c->SaveAs("LaserBallMap_060126.png");
 }
