@@ -53,6 +53,10 @@ void plotLaserBallMap_withTimingCuts() {
     std::vector<double> onepe_guess = {0.032, 0.025, 0.042, 0.024};
     std::vector<double> onepe_sigma_guess = {0.009, 0.008, 0.013, 0.006};
 
+
+    //In case it's needed, we can also apply a fixed pedestal and gain value, deciding it from
+    //a combination of fits. If the fits and gain are stable this should not modify much, if not
+    //then it is better to understand the reason behind the PMT instability...
     std::vector<double> ped_mean = {-0.00242, -0.00219, -0.00184, 0.0044};
     std::vector<double> gain_mean = {0.03353, 0.02891, 0.04337, 0.02271};
     // ================= OUTPUT FILE =================
@@ -290,7 +294,7 @@ void plotLaserBallMap_withTimingCuts() {
 
             for (size_t i = 0; i < laser_pulses.size(); ++i) {
                 //here can use the ped and gain calculated for this specific entry or the mean vals
-                double pe = (laser_pulses[i] - ped_mean[ip]) / gain_mean[ip];
+                double pe = (laser_pulses[i] - ped) / gain;
                 sum_norm += pe / laser_monitor[i];
             }
 
